@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, Text, View, Alert, Linking } from 'react-native';
+import { KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, Text, View, Alert, Linking, Image } from 'react-native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../app/navigation';
 import { TabToggle } from '../../components/TabToggle';
 import { TextField } from '../../components/TextField';
 import { Button } from '../../components/Button';
@@ -16,7 +18,9 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
-export function LoginScreen() {
+type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
+
+export function LoginScreen({ navigation }: Props) {
   const [tab, setTab] = useState<'left' | 'right'>('left'); // left=PF, right=PJ
   const [loading, setLoading] = useState(false);
 
@@ -60,7 +64,10 @@ export function LoginScreen() {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
           <View style={{ backgroundColor: colors.primary, paddingBottom: 24, paddingTop: 24, alignItems: 'center' }}>
-            {/* Logo placeholder intentionally omitted */}
+            <Image
+              source={require('../../../assets/facil-alagoas-vetorizada-positivo.png')}
+              style={{ width: 140, height: 40, resizeMode: 'contain' }}
+            />
           </View>
 
           <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 24 }}>
@@ -93,7 +100,7 @@ export function LoginScreen() {
             <Button title="Login" onPress={handleSubmit(onLogin)} loading={loading} />
 
             <View style={{ alignItems: 'center', marginTop: 20 }}>
-              <Text style={{ color: colors.textSecondary }}>
+              <Text style={{ color: colors.textSecondary }} onPress={() => navigation.navigate('Register')}>
                 Não tem conta? <Text style={{ fontWeight: '700', color: colors.text }}>Cadastrar</Text>
               </Text>
               <View style={{ height: 8 }} />
