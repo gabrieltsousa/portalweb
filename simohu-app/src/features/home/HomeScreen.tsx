@@ -41,7 +41,7 @@ export function HomeScreen({ navigation }: Props) {
           <View style={{ marginTop: 24 }}>
             <Button title="Faça Login" onPress={() => navigation.navigate('Login')} />
             <View style={{ height: 12 }} />
-            <Button title="Cadastre-se" onPress={() => navigation.navigate('Register')} style={{ backgroundColor: '#DFE7EE' as any }} />
+            <Button title="Cadastre-se" onPress={() => navigation.navigate('AccountType')} style={{ backgroundColor: '#DFE7EE' as any }} />
           </View>
         </View>
 

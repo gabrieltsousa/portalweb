@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Alert, Image, KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, Text, View } from 'react-native';
 import { colors } from '../../theme/colors';
 import { TextField } from '../../components/TextField';
@@ -9,13 +9,15 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { UserService } from '../../services/user.service';
+import { ViaCepService } from '../../services/viacep.service';
+import { isValidCPF, maskBirthDate, maskCEP, maskCPF, onlyDigits, isValidBirthDate } from '../../utils/format';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Register'>;
 
 const personalSchema = z.object({
   VC_NOME: z.string().min(1, 'Informe o nome completo'),
-  VC_CPF: z.string().min(11, 'CPF inválido'),
-  DT_NASCIMENTO: z.string().min(10, 'Data inválida'),
+  VC_CPF: z.string().refine((v) => isValidCPF(v), 'CPF inválido'),
+  DT_NASCIMENTO: z.string().refine((v) => isValidBirthDate(v), 'Data inválida'),
   VC_LOGIN: z.string().min(1, 'Informe o email').email('Email inválido'),
   VC_TELRESIDENCIAL: z.string().min(8, 'Telefone inválido').optional().or(z.literal('')),
   VC_CELULAR: z.string().min(9, 'Celular inválido'),
@@ -28,7 +30,7 @@ const personalSchema = z.object({
 });
 
 const addressSchema = z.object({
-  VC_CEP: z.string().min(8, 'CEP inválido'),
+  VC_CEP: z.string().min(9, 'CEP inválido'),
   VC_LOGRADOURO: z.string().min(1, 'Informe o logradouro'),
   NI_NUMERO: z.string().min(1, 'Informe o número'),
   VC_COMPLEMENTO: z.string().optional(),
@@ -43,6 +45,7 @@ type AddressValues = z.infer<typeof addressSchema>;
 export function RegisterScreen({ navigation }: Props) {
   const [step, setStep] = useState<1 | 2>(1);
   const [loading, setLoading] = useState(false);
+  const [cepLoading, setCepLoading] = useState(false);
 
   const personalForm = useForm<PersonalValues>({
     resolver: zodResolver(personalSchema),
@@ -97,6 +100,27 @@ export function RegisterScreen({ navigation }: Props) {
     register('VC_MUNICIPIO');
     register('VC_UF');
   }, [addressForm]);
+
+  // CEP lookup with ViaCEP when full CEP is typed
+  const onCepChange = async (text: string) => {
+    const masked = maskCEP(text);
+    addressForm.setValue('VC_CEP', masked, { shouldValidate: true });
+    const digits = onlyDigits(masked);
+    if (digits.length === 8) {
+      try {
+        setCepLoading(true);
+        const data = await ViaCepService.lookup(digits);
+        if (data) {
+          addressForm.setValue('VC_LOGRADOURO', data.logradouro || '', { shouldValidate: true });
+          addressForm.setValue('VC_BAIRRO', data.bairro || '', { shouldValidate: true });
+          addressForm.setValue('VC_MUNICIPIO', data.localidade || '', { shouldValidate: true });
+          addressForm.setValue('VC_UF', data.uf || '', { shouldValidate: true });
+        }
+      } finally {
+        setCepLoading(false);
+      }
+    }
+  };
 
   const goNext = async () => {
     const values = personalForm.getValues();
@@ -176,14 +200,16 @@ export function RegisterScreen({ navigation }: Props) {
                   label="CPF"
                   placeholder="Digite seu CPF"
                   keyboardType="number-pad"
-                  onChangeText={(t) => personalForm.setValue('VC_CPF', t, { shouldValidate: true })}
+                  value={maskCPF(personalForm.getValues('VC_CPF'))}
+                  onChangeText={(t) => personalForm.setValue('VC_CPF', maskCPF(t), { shouldValidate: true })}
                   errorText={personalForm.formState.errors.VC_CPF?.message}
                 />
                 <TextField
                   label="Data de Nascimento"
                   placeholder="dd/mm/aaaa"
                   keyboardType="number-pad"
-                  onChangeText={(t) => personalForm.setValue('DT_NASCIMENTO', t, { shouldValidate: true })}
+                  value={maskBirthDate(personalForm.getValues('DT_NASCIMENTO'))}
+                  onChangeText={(t) => personalForm.setValue('DT_NASCIMENTO', maskBirthDate(t), { shouldValidate: true })}
                   errorText={personalForm.formState.errors.DT_NASCIMENTO?.message}
                 />
                 <TextField
@@ -239,7 +265,8 @@ export function RegisterScreen({ navigation }: Props) {
                   label="CEP"
                   placeholder="00000-000"
                   keyboardType="number-pad"
-                  onChangeText={(t) => addressForm.setValue('VC_CEP', t, { shouldValidate: true })}
+                  value={maskCEP(addressForm.getValues('VC_CEP'))}
+                  onChangeText={onCepChange}
                   errorText={addressForm.formState.errors.VC_CEP?.message}
                 />
                 <TextField
@@ -286,7 +313,7 @@ export function RegisterScreen({ navigation }: Props) {
                   </View>
                   <View style={{ width: 12 }} />
                   <View style={{ flex: 1 }}>
-                    <Button title="Cadastrar" onPress={submit} loading={loading} />
+                    <Button title={cepLoading ? 'Consultando CEP...' : 'Cadastrar'} onPress={submit} loading={loading} />
                   </View>
                 </View>
               </>

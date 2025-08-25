@@ -4,12 +4,14 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { LoginScreen } from '../features/auth/LoginScreen';
 import { HomeScreen } from '../features/home/HomeScreen';
 import { RegisterScreen } from '../features/auth/RegisterScreen';
+import { AccountTypeScreen } from '../features/auth/AccountTypeScreen';
 import { colors } from '../theme/colors';
 
 export type RootStackParamList = {
   Home: undefined;
   Login: undefined;
   Register: undefined;
+  AccountType: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -25,6 +27,7 @@ export function AppNavigator() {
       <Stack.Navigator>
         <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="AccountType" component={AccountTypeScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
