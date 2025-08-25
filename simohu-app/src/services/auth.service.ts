@@ -1,4 +1,5 @@
 import { api } from './api';
+import { TokenService } from './token.service';
 
 export type LoginPayload = {
   login: string;
@@ -14,7 +15,11 @@ export type LoginResponse = {
 
 export const AuthService = {
   async login(payload: LoginPayload): Promise<LoginResponse> {
-    const response = await api.post('/auth/login', payload);
-    return response.data as LoginResponse;
+    const response = await api.post('/login', payload);
+    const data = response.data as LoginResponse;
+    if (data?.token) {
+      TokenService.setToken(data.token);
+    }
+    return data;
   },
 };
