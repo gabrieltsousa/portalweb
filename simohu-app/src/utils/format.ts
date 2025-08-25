@@ -56,16 +56,41 @@ export function isValidCPF(raw: string): boolean {
 }
 
 export function isValidBirthDate(ddmmyyyy: string): boolean {
-  // Expect dd/mm/yyyy
-  const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(ddmmyyyy);
+  if (!ddmmyyyy) return false;
+  const value = ddmmyyyy.trim();
+  const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value);
   if (!m) return false;
+
   const day = parseInt(m[1], 10);
   const month = parseInt(m[2], 10);
   const year = parseInt(m[3], 10);
+
   if (year < 1900 || year > new Date().getFullYear()) return false;
   if (month < 1 || month > 12) return false;
+
   const daysInMonth = new Date(year, month, 0).getDate();
   if (day < 1 || day > daysInMonth) return false;
+
   return true;
 }
+export function maskPhone(value: string): string {
+  const digits = onlyDigits(value).slice(0, 11); // limita a 11 dígitos
+  const ddd = digits.slice(0, 2);
+  const part1 = digits.length > 10
+    ? digits.slice(2, 7) // celular (5 dígitos depois do DDD)
+    : digits.slice(2, 6); // fixo (4 dígitos depois do DDD)
+  const part2 = digits.length > 10
+    ? digits.slice(7, 11) // celular (últimos 4)
+    : digits.slice(6, 10); // fixo (últimos 4)
 
+  let result = '';
+  if (ddd) result = `(${ddd}`;
+  if (part1) result += `) ${part1}`;
+  if (part2) result += `-${part2}`;
+  return result;
+}
+
+export function isValidPhone(value: string): boolean {
+  const digits = onlyDigits(value);
+  return digits.length === 10 || digits.length === 11;
+}
