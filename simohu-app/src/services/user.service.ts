@@ -5,7 +5,7 @@ export type RegisterPayload = {
   NI_TIPOUSUARIOPORTAL: number;
   VC_LOGIN: string;
   VC_NOME: string;
-  VC_SEXO: string;
+  VC_SEXO: number;
   VC_CPF: number | string;
   VC_CELULAR: string;
   VC_TELRESIDENCIAL: string;

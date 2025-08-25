@@ -12,6 +12,7 @@ import {
 import { colors } from "../../theme/colors";
 import { TextField } from "../../components/TextField";
 import { Button } from "../../components/Button";
+import { SelectField } from "../../components/SelectField";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../app/navigation";
 import { Controller, useForm } from "react-hook-form";
@@ -48,7 +49,9 @@ const personalSchema = z
     VC_CELULAR: z
       .string()
       .refine((val) => isValidPhone(val), "Celular inválido"),
-    VC_SEXO: z.string().min(1, "Informe o sexo"),
+    VC_SEXO: z
+      .number()
+      .refine((v) => v === 1 || v === 2, "Informe o sexo"),
     VC_SENHA: z.string().min(6, "Mínimo 6 caracteres"),
     CONFIRMAR_SENHA: z.string().min(6, "Mínimo 6 caracteres"),
   })
@@ -84,7 +87,7 @@ export function RegisterScreen({ navigation }: Props) {
       VC_LOGIN: "",
       VC_TELRESIDENCIAL: "",
       VC_CELULAR: "",
-      VC_SEXO: "",
+      VC_SEXO: 0 as any,
       VC_SENHA: "",
       CONFIRMAR_SENHA: "",
     },
@@ -339,15 +342,22 @@ export function RegisterScreen({ navigation }: Props) {
                     />
                   )}
                 />
-                <TextField
-                  label="Sexo"
-                  placeholder="Selecione"
-                  onChangeText={(t) =>
-                    personalForm.setValue("VC_SEXO", t, {
-                      shouldValidate: true,
-                    })
-                  }
-                  errorText={personalForm.formState.errors.VC_SEXO?.message}
+                <Controller
+                  control={personalForm.control}
+                  name="VC_SEXO"
+                  render={({ field, fieldState }) => (
+                    <SelectField
+                      label="Sexo"
+                      placeholder="Selecione"
+                      value={field.value}
+                      onChange={(val) => field.onChange(val)}
+                      options={[
+                        { label: "Masculino", value: 1 },
+                        { label: "Feminino", value: 2 },
+                      ]}
+                      errorText={fieldState.error?.message}
+                    />
+                  )}
                 />
                 <TextField
                   label="Senha"
