@@ -8,9 +8,10 @@ export type ButtonProps = {
   disabled?: boolean;
   loading?: boolean;
   style?: ViewStyle;
+  colorText?: string;
 };
 
-export function Button({ title, onPress, disabled, loading, style }: ButtonProps) {
+export function Button({ title, onPress, disabled, loading, style, colorText }: ButtonProps) {
   const isDisabled = disabled || loading;
 
   return (
@@ -28,7 +29,7 @@ export function Button({ title, onPress, disabled, loading, style }: ButtonProps
       {loading ? (
         <ActivityIndicator color="#fff" />
       ) : (
-        <Text style={{ color: '#fff', fontWeight: '600', fontSize: 18 }}>{title}</Text>
+        <Text style={{ color: colorText ? colorText : '#fff' , fontWeight: '600', fontSize: 18, paddingHorizontal:16,}}>{title}</Text>
       )}
     </Pressable>
   );
