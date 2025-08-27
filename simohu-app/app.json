@@ -1,6 +1,5 @@
 {
   "expo": {
-    
     "name": "simohu-app",
     "slug": "simohu-app",
     "version": "1.0.0",
@@ -37,9 +36,7 @@
       }
     },
     "owner": "gabriel-sousa-onebox",
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
+    "runtimeVersion": "1.0.0",
     "updates": {
       "url": "https://u.expo.dev/c7e71340-fbe5-45d6-ab65-dd03606badad"
     },
